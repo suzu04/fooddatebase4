@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>食品成分データベース — ヘルプ（簡素版）</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 12px;
+            margin-bottom: 18px
+        }
+
+        nav a {
+            margin-right: 12px
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #222
+        }
+
+        ul {
+            padding-left: 1.1em
+        }
+
+        .faq {
+            margin-top: 14px
+        }
+
+        footer {
+            border-top: 1px solid #eee;
+            margin-top: 26px;
+            padding-top: 12px;
+            font-size: 0.9rem;
+            color: #555
+        }
+
+        code {
+            background: #f6f8fa;
+            padding: 2px 6px;
+            border-radius: 4px
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>食品成分データベース — ヘルプ（簡素版）</h1>
+        <p>このページは文部科学省「食品成分データベース」ヘルプ（要約）を簡潔にまとめたものです。</p>
+        <nav>
+            <a href="#manual">操作説明書</a>
+            <a href="#faq">よくある質問（FAQ）</a>
+            <a href="#contact">問い合わせ</a>
+        </nav>
+    </header>
+
+    <section id="manual">
+        <h2>操作説明書</h2>
+        <p>詳細な操作説明はオリジナルのHTML版・PDFを参照してください（公式サイトに掲載）。</p>
+    </section>
+
+    <section id="faq" class="faq">
+        <h2>よくある質問（抜粋）</h2>
+
+        <h3>1. データソースはどこで入手できますか？</h3>
+        <p>文部科学省が公開する「日本食品標準成分表（八訂）増補2023年」などを参照してください。PDF・Excelで入手可能です。</p>
+
+        <h3>2. 検索結果を掲載してもよいですか？</h3>
+        <p>引用・掲載する場合は、文部科学省の該当ページを参照の上、出典を明記してください。</p>
+
+        <h3>3. ホームページへのリンクやバナーについて</h3>
+        <ul>
+            <li>トップページのURLを使用してください（システム変更で下層ページは変わる可能性あり）。</li>
+            <li>リンク掲載時は所定の文言の記載をお願いします（公式サイトの指示に従ってください）。</li>
+        </ul>
+
+        <h3>4. 探している食品が見つかりません</h3>
+        <p>主な原因：データがない、検索方法の誤り、登録名と異なる呼び名で検索している。フリーワードは<strong>全角ひらがな</strong>で入力します（例：いわし）。</p>
+
+        <h3>5. 検索結果の値が空白の場合</h3>
+        <p>空白はデータソースに該当成分の記載がないことを示します。<code>0</code>と表示される場合は、最小記載限度に達していないか検出されなかったことを意味します。</p>
+
+        <h3>6. データの電子媒体入手について</h3>
+        <p>文部科学省のホームページからPDF・Excelが入手できます。また、検索結果はCSVでダウンロード可能です。</p>
+
+        <h3>7. 廃棄率のある食品の成分表示</h3>
+        <p>表示は可食部100 g あたりの値です。</p>
+
+        <h3>8. データベースに掲載のない食品について</h3>
+        <p>掲載外の食品データは、データソース側にも存在しない場合が多く、提供できません。</p>
+
+        <h3>9. 栄養や調理の質問</h3>
+        <p>本データベースはデータ提供・運用が主であり、栄養や調理相談には対応していません。自治体の保健窓口などへ相談してください。</p>
+
+        <h3>10. 特殊記号の意味</h3>
+        <p>例：<code>-</code>は未測定、<code>0</code>は最小記載量未満または検出されなかったこと、<code>Tr</code>は微量（最小記載量の一部）を意味します。詳細は公式の成分表注記を参照してください。
+        </p>
+
+        <h3>その他</h3>
+        <p>印刷、動作環境、ランキングなどの項目も公式ヘルプで説明があります。</p>
+    </section>
+
+    <section id="contact">
+        <h2>問い合わせ</h2>
+        <p>リンクや掲載の際の連絡先例：<br><code>kagseis@mext.go.jp</code></p>
+    </section>
+
+    <footer>
+        <p>原典：文部科学省「食品成分データベース」ヘルプ（簡素化）</p>
+        <p>このページは簡略版です。元ページの最新情報や細かい注記・表記は公式サイトを必ずご確認ください。</p>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,98 @@
+/* 全体レイアウトの調整 */
+.accordion {
+    margin: 10px 0;
+    font-family: "Yu Gothic", "Meiryo", sans-serif;
+}
+
+/* 大項目 */
+.toggle-button {
+    font-weight: bold;
+    cursor: pointer;
+    padding: 10px 10px 10px 30px;
+    background: #e6f4ea;
+    border-radius: 6px;
+    margin: 5px 0;
+    position: relative;
+}
+
+.accordion-header::before {
+    content: "＋ ";
+    position: absolute;
+    left: 10px;
+}
+
+/* 中項目 */
+.accordion-sub-header {
+    font-weight: 600;
+    cursor: pointer;
+    padding-left: 50px;
+    /* 大項目より右にずらすだけ */
+    background: #f1f5f9;
+    border-left: 4px solid #a0aec0;
+    margin: 3px 0;
+    position: relative;
+}
+
+/* 中項目トグル（サブカテゴリ）の色変更 */
+.sub-toggle {
+    background-color: #d0e7f9;
+    /* 好きな色に変更 */
+    padding: 6px 10px 6px 40px;
+    /* 左インデントを少し増やす */
+    border-left: 4px solid #80b0d0;
+    /* 必要なら境界線も変更 */
+    margin: 3px 0;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+}
+
+.accordion-sub-header::before {
+    content: "＋ ";
+    position: absolute;
+    left: 10px;
+}
+
+/* 折りたたみコンテンツ */
+.checkbox-group,
+.sub-list {
+    display: none;
+}
+
+/* クリックで開くとき */
+.checkbox-group.active,
+.sub-list.active {
+    display: block;
+}
+
+/* 展開時マーク変更 */
+.accordion-header.active::before,
+.accordion-sub-header.active::before {
+    content: "− ";
+}
+
+/* コンテンツ非表示 */
+.sub-list {
+    list-style: none;
+    margin: 4px 0;
+    padding-left: 20px;
+    /* 中項目の下のインデント */
+}
+
+/* 展開時表示 */
+.accordion-content.active,
+.sub-list.active {
+    display: block;
+}
+
+/* サブリスト（リストマークなし） */
+.sub-list {
+    list-style: none;
+    margin: 4px 0;
+    padding-left: 20px;
+    /* ここは中項目の下のインデント */
+}
+
+.sub-list li {
+    margin: 3px 0;
+}

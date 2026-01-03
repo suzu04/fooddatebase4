@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>検索結果 - 食品成分データベース</title>
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: #f8fafc;
+            color: #333;
+        }
+
+        header,
+        footer {
+            text-align: center;
+        }
+
+        header {
+            background: #2f855a;
+            color: white;
+            padding: 15px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 5px;
+            text-align: center;
+        }
+
+        th {
+            background: #e2f0d9;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>食品成分データベース - 検索結果</h1>
+        <a href="/">🔙 戻る</a>
+    </header>
+
+    <main>
+        {% if rows %}
+        <section>
+            <h2>「{{ keyword }}」の検索結果</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>グループ</th>
+                        <th>番号</th>
+                        <th>食品名</th>
+                        <th>エネルギー(kcal)</th>
+                        <th>たんぱく質(g)</th>
+                        <th>脂質(g)</th>
+                        <th>炭水化物(g)</th>
+                        <th>ナトリウム(mg)</th>
+                        <th>カリウム(mg)</th>
+                        <th>カルシウム(mg)</th>
+                        <th>マグネシウム(mg)</th>
+                        <th>リン(mg)</th>
+                        <th>鉄(mg)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        {% for col in row %}
+                        <td>{{ col }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        {% else %}
+        <section>
+            <p>「{{ keyword }}」に一致する結果はありません。</p>
+        </section>
+        {% endif %}
+    </main>
+
+    <footer>
+        © 2025 Japan Science and Technology Agency. All rights reserved.
+    </footer>
+</body>
+
+</html>
