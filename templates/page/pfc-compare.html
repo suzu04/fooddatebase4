@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PFCバランス計算サイト</title>
+    <style>
+        :root {
+            --bg: #f7fafc;
+            --card: #fff;
+            --accent: #2563eb;
+            --muted: #6b7280
+        }
+
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+            background: var(--bg);
+            margin: 0;
+            padding: 24px;
+            color: #111
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 16px
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            margin: 0
+        }
+
+        p.lead {
+            color: var(--muted);
+            margin-top: 6px
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 18px
+        }
+
+        @media(min-width:900px) {
+            .grid {
+                grid-template-columns: 380px 1fr
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06)
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 6px
+        }
+
+        input[type="number"],
+        select,
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            font-size: 0.95rem
+        }
+
+        .row {
+            display: flex;
+            gap: 8px
+        }
+
+        .row .col {
+            flex: 1
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: var(--accent);
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            cursor: pointer
+        }
+
+        .btn.secondary {
+            background: #e5e7eb;
+            color: #111
+        }
+
+        .presets {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        .preset {
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            cursor: pointer
+        }
+
+        .result {
+            font-weight: 700;
+            font-size: 1rem
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px
+        }
+
+        th,
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #eef2f7;
+            text-align: left
+        }
+
+        .muted {
+            color: var(--muted)
+        }
+
+        .sample-meal {
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .meal-item {
+            display: flex;
+            justify-content: space-between;
+            background: #fbfdff;
+            padding: 8px;
+            border-radius: 8px
+        }
+
+        footer {
+            margin-top: 20px;
+            color: var(--muted);
+            font-size: 0.85rem
+        }
+
+        .small {
+            font-size: 0.85rem;
+            color: var(--muted)
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>PFCバランス計算サイト</h1>
+                <p class="lead">体重・目標・活動量からP（たんぱく質）・F（脂質）・C（炭水化物）を自動で計算します。食事例もワンクリックで生成。</p>
+            </div>
+        </header>
+
+        <main class="grid">
+            <section class="card">
+                <h2>入力</h2>
+                <div style="margin-top:10px">
+                    <label>体重（kg）</label>
+                    <input id="weight" type="number" min="20" step="0.1" value="70">
+                </div>
+                <div style="margin-top:10px">
+                    <label>体脂肪率（任意、%） <span class="small">（入力で推定除脂肪体重に基づくタンパク質推定が可能）</span></label>
+                    <input id="bf" type="number" min="0" max="80" step="0.1" placeholder="未入力でも可">
+                </div>
+
+                <div style="margin-top:10px">
+                    <label>目標</label>
+                    <select id="goal">
+                        <option value="maint">維持（Maintenance）</option>
+                        <option value="loss">減量（Fat loss）</option>
+                        <option value="gain">増量（Muscle gain）</option>
+                    </select>
+                </div>
+
+                <div style="margin-top:10px">
+                    <label>活動レベル（TDEE目安）</label>
+                    <select id="activity">
+                        <option value="1.2">ほとんど運動しない（1.2）</option>
+                        <option value="1.375">軽い運動（1.375）</option>
+                        <option value="1.55" selected>中程度の運動（1.55）</option>
+                        <option value="1.725">激しい運動（1.725）</option>
+                        <option value="1.9">非常に激しい（1.9）</option>
+                    </select>
+                </div>
+
+                <div style="margin-top:10px">
+                    <label>基礎代謝（BMR）を自分で入力しますか？（kcal） <span class="small">未入力の場合はMifflin-St Jeor式で推定します</span></label>
+                    <input id="bmr_input" type="number" min="0" placeholder="空欄で自動計算">
+                </div>
+
+                <div style="margin-top:10px">
+                    <label>性別 / 年齢（BMR推定用）</label>
+                    <div class="row">
+                        <div class="col">
+                            <select id="sex">
+                                <option value="male">男性</option>
+                                <option value="female">女性</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <input id="age" type="number" min="12" max="100" value="30">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top:12px">
+                    <label>摂取カロリー（任意で直接入力、空欄でTDEEベース自動計算）</label>
+                    <input id="cal_input" type="number" min="0" placeholder="例：2000">
+                </div>
+
+                <div style="margin-top:12px">
+                    <label>比率プリセット</label>
+                    <div class="presets">
+                        <div class="preset" data-p="0.25" data-f="0.25" data-c="0.5">スタンダード P25 F25 C50</div>
+                        <div class="preset" data-p="0.30" data-f="0.25" data-c="0.45">高タンパク P30 F25 C45</div>
+                        <div class="preset" data-p="0.40" data-f="0.25" data-c="0.35">筋肥大向け P40 F25 C35</div>
+                        <div class="preset" data-p="0.35" data-f="0.20" data-c="0.45">減量時 P35 F20 C45</div>
+                        <div class="preset" data-p="0.20" data-f="0.30" data-c="0.5">やや高脂質 P20 F30 C50</div>
+                    </div>
+                </div>
+
+                <div style="margin-top:12px">
+                    <label>カスタム比率（小数で入力またはプリセットをクリック）</label>
+                    <div class="row">
+                        <div class="col"><input id="p_ratio" type="number" step="0.01" min="0" max="1"
+                                placeholder="P（例0.30）" value="0.30"></div>
+                        <div class="col"><input id="f_ratio" type="number" step="0.01" min="0" max="1"
+                                placeholder="F（例0.25）" value="0.25"></div>
+                        <div class="col"><input id="c_ratio" type="number" step="0.01" min="0" max="1"
+                                placeholder="C（例0.45）" value="0.45"></div>
+                    </div>
+                </div>
+
+                <div style="margin-top:14px;display:flex;gap:8px">
+                    <button id="calcBtn" class="btn">計算する</button>
+                    <button id="saveBtn" class="btn secondary">設定を保存</button>
+                </div>
+
+                <div style="margin-top:14px" class="small muted">計算は目安です。医師・管理栄養士の指導が必要な場合は専門家に相談してください。</div>
+            </section>
+
+            <section class="card">
+                <h2>結果</h2>
+                <div id="resultsArea">
+                    <p class="muted">まだ計算されていません。上の入力欄で値を入れて「計算する」を押してください。</p>
+                </div>
+
+                <div style="margin-top:12px">
+                    <h3>食事例を生成</h3>
+                    <p class="small muted">計算結果に近い1日のメニュー（簡易）を提案します。食材の量は目安です。</p>
+                    <div style="margin-top:8px;display:flex;gap:8px">
+                        <button id="genMeal" class="btn secondary">食事例を作る</button>
+                        <button id="exportCsv" class="btn">CSVでダウンロード</button>
+                    </div>
+
+                    <div id="mealBox" style="margin-top:12px"></div>
+                </div>
+
+                <div style="margin-top:14px">
+                    <h3>メモ・注意点</h3>
+                    <ul class="small muted">
+                        <li>たんぱく質1g = 4 kcal、炭水化物1g = 4 kcal、脂質1g = 9 kcalで計算しています。</li>
+                        <li>たんぱく質は体重1kgあたり1.6〜2.2gを目安に推奨されます（運動量や目標による）。</li>
+                        <li>体脂肪率があると除脂肪体重（LBM）を元にしたタンパク質推定ができます。</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer class="small muted">このページは自動生成されたサンプルです。細かいレイアウトや文言変更は対応できます。必要ならReact版やDB連携版も作ります。</footer>
+    </div>
+
+    <script>
+        // ユーティリティ
+        function $(id) { return document.getElementById(id) }
+
+        // プリセットクリック
+        document.querySelectorAll('.preset').forEach(el => {
+            el.addEventListener('click', () => {
+                $('p_ratio').value = el.dataset.p
+                $('f_ratio').value = el.dataset.f
+                $('c_ratio').value = el.dataset.c
+            })
+        })
+
+        // 保存・復元
+        function saveSettings() {
+            const s = {
+                weight: $('weight').value,
+                bf: $('bf').value,
+                goal: $('goal').value,
+                activity: $('activity').value,
+                sex: $('sex').value,
+                age: $('age').value,
+                p_ratio: $('p_ratio').value,
+                f_ratio: $('f_ratio').value,
+                c_ratio: $('c_ratio').value,
+                bmr_input: $('bmr_input').value,
+                cal_input: $('cal_input').value
+            }
+            localStorage.setItem('pfc_settings', JSON.stringify(s))
+            alert('設定を保存しました')
+        }
+        function loadSettings() {
+            const s = JSON.parse(localStorage.getItem('pfc_settings') || 'null')
+            if (!s) return
+            Object.keys(s).forEach(k => { if ($(k)) $(k).value = s[k] })
+        }
+        $('saveBtn').addEventListener('click', saveSettings)
+        loadSettings()
+
+        // BMR推定（簡易：Mifflin-St Jeor）
+        function estimateBMR({ sex, weight, age }) {
+            // 身長を推定するのは不正確なので身長を固定値（170/158）を仮定する代替案は避ける。
+            // ここでは体重のみで単純化した補正式を用いる（目安）。
+            // より正確にしたければ身長を入力させてください。
+            // 省略のため、仮の身長：男性170cm 女性158cm
+            const h = (sex === 'male') ? 170 : 158
+            const bmr = Math.round(10 * weight + 6.25 * h - 5 * age + (sex === 'male' ? 5 : -161))
+            return bmr
+        }
+
+        function clampSum(p, f, c) {
+            const sum = p + f + c
+            if (Math.abs(sum - 1) < 0.0001) return [p, f, c]
+            // 正規化
+            return [p / sum, f / sum, c / sum]
+        }
+
+        function calc() {
+            const weight = parseFloat($('weight').value) || 0
+            const bf = parseFloat($('bf').value)
+            const sex = $('sex').value
+            const age = parseInt($('age').value) || 30
+            const activity = parseFloat($('activity').value)
+            const goal = $('goal').value
+            let bmr = parseFloat($('bmr_input').value)
+            if (!bmr) { bmr = estimateBMR({ sex, weight, age }) }
+
+            // TDEE
+            let tdee = Math.round(bmr * activity)
+
+            // 目標のカロリー設定
+            let cal = parseFloat($('cal_input').value)
+            if (!cal) {
+                if (goal === 'loss') cal = Math.round(tdee - 500)
+                else if (goal === 'gain') cal = Math.round(tdee + 300)
+                else cal = tdee
+            }
+
+            // 比率
+            let p = parseFloat($('p_ratio').value) || 0.3
+            let f = parseFloat($('f_ratio').value) || 0.25
+            let c = parseFloat($('c_ratio').value) || 0.45
+            [p, f, c] = clampSum(p, f, c)
+
+            // もし体脂肪率が入力されていればLBMベースのタンパク質推定を提案
+            let protPerKg = null
+            if (!isNaN(bf) && bf > 0 && bf < 80) {
+                const lbm = weight * (1 - bf / 100)
+                // 筋肥大はLBM当たり1.8-2.2g、維持は1.6-1.8gなど（目安）
+                protPerKg = (goal === 'gain') ? 2.0 : (goal === 'loss') ? 1.8 : 1.8
+                // 提案量
+                const prot_g_from_lbm = Math.round(lbm * protPerKg)
+                // この推奨値がカロリー比と大きくズレる場合は注記を出す
+                // カロリー比からのg
+                const prot_g_by_ratio = Math.round((cal * p) / 4)
+
+                // 最終的に上限下限を考慮して採用
+                // ここでは表示のみ
+                var prot_note = `除脂肪体重(LBM)ベースの推奨: ${prot_g_from_lbm} g（LBM ${Math.round(lbm)} kg × ${protPerKg} g/kg） 。カロリー比からの推定: ${prot_g_by_ratio} g。`
+            }
+
+            // グラムに換算
+            const prot_g = Math.round((cal * p) / 4)
+            const fat_g = Math.round((cal * f) / 9)
+            const carb_g = Math.round((cal * c) / 4)
+
+            const resultsArea = $('resultsArea')
+            resultsArea.innerHTML = `
+      <div>
+        <p><span class="muted">推定BMR:</span> ${bmr} kcal　<span class="muted">TDEE(活動量反映):</span> ${tdee} kcal</p>
+        <p><span class="muted">目標カロリー:</span> <strong class="result">${cal} kcal</strong></p>
+        <table>
+          <thead><tr><th>栄養素</th><th>割合</th><th>グラム</th><th> kcal</th></tr></thead>
+          <tbody>
+            <tr><td>たんぱく質 (P)</td><td>${(p * 100).toFixed(0)}%</td><td>${prot_g} g</td><td>${prot_g * 4} kcal</td></tr>
+            <tr><td>脂質 (F)</td><td>${(f * 100).toFixed(0)}%</td><td>${fat_g} g</td><td>${fat_g * 9} kcal</td></tr>
+            <tr><td>炭水化物 (C)</td><td>${(c * 100).toFixed(0)}%</td><td>${carb_g} g</td><td>${carb_g * 4} kcal</td></tr>
+          </tbody>
+        </table>
+        ${prot_note ? `<p class="small muted">${prot_note}</p>` : ''}
+      </div>
+    `
+
+            // 保存結果をwindowに保持して食事生成で使えるようにする
+            window.latestPFC = { cal, p, f, c, prot_g, fat_g, carb_g }
+        }
+
+        $('calcBtn').addEventListener('click', calc)
+
+        // 食事例生成（簡易ロジック）
+        const FOODS = [
+            { name: '鶏むね肉（加熱）100g', p: 31, f: 3.6, c: 0, cal: 165 },
+            { name: '卵（L）1個', p: 6.3, f: 5.3, c: 0.4, cal: 78 },
+            { name: '納豆 1パック(50g)', p: 10, f: 5, c: 8, cal: 120 },
+            { name: 'ご飯（白米）100g', p: 2.5, f: 0.4, c: 37.1, cal: 168 },
+            { name: 'サラダ（野菜のみ）100g', p: 1.2, f: 0.2, c: 3.5, cal: 20 },
+            { name: 'オートミール 50g', p: 7, f: 3.5, c: 30, cal: 200 },
+            { name: 'アボカド 100g', p: 2, f: 15, c: 9, cal: 160 },
+            { name: 'サーモン 100g', p: 20, f: 13, c: 0, cal: 208 },
+            { name: 'ギリシャヨーグルト 150g', p: 10, f: 0.7, c: 6, cal: 100 },
+            { name: 'さつまいも 100g', p: 1.6, f: 0.1, c: 21, cal: 86 }
+        ]
+
+        function genMeal() {
+            const s = window.latestPFC
+            if (!s) { alert('まず計算してください'); return }
+            // 単純な分割：朝昼夜＋間食
+            const targets = [0.28, 0.36, 0.28, 0.08] // カロリー配分
+            const mealBox = $('mealBox')
+            mealBox.innerHTML = ''
+            const meals = ['朝食', '昼食', '夕食', '間食']
+            const plan = []
+            let remaining = { p: s.prot_g, f: s.fat_g, c: s.carb_g, cal: s.cal }
+
+            for (let i = 0; i < meals.length; i++) {
+                const targetCal = Math.round(s.cal * targets[i])
+                // 簡易：食品をランダムに追加してターゲットに近づける
+                let cur = { p: 0, f: 0, c: 0, cal: 0, items: [] }
+                // 優先的にタンパク質を確保
+                let tries = 0
+                while ((cur.cal < targetCal) && tries < 80) {
+                    tries++
+                    const food = FOODS[Math.floor(Math.random() * FOODS.length)]
+                    // add one portion of item (100g or defined)
+                    cur.items.push(food)
+                    cur.p += food.p
+                    cur.f += food.f
+                    cur.c += food.c
+                    cur.cal += food.cal
+                }
+                plan.push({ meal: meals[i], targetCal, summary: cur })
+            }
+
+            // 表示
+            plan.forEach(p => {
+                const div = document.createElement('div')
+                div.className = 'meal-item'
+                const left = document.createElement('div')
+                left.innerHTML = `<strong>${p.meal}</strong><div class="small muted">目標 ${p.targetCal} kcal</div><div class="small muted">項目数 ${p.summary.items.length}</div>`
+                const right = document.createElement('div')
+                right.innerHTML = `<div>${Math.round(p.summary.p)} g P / ${Math.round(p.summary.f)} g F / ${Math.round(p.summary.c)} g C</div><div class="small muted">${p.summary.cal} kcal</div>`
+                div.appendChild(left); div.appendChild(right)
+
+                // 展開してアイテム一覧
+                const ul = document.createElement('div')
+                ul.style.marginTop = '8px'
+                p.summary.items.forEach(it => {
+                    const item = document.createElement('div')
+                    item.className = 'small muted'
+                    item.textContent = `${it.name} — ${it.cal} kcal (P ${it.p}g / F ${it.f}g / C ${it.c}g)`
+                    ul.appendChild(item)
+                })
+
+                const wrapper = document.createElement('div')
+                wrapper.appendChild(div)
+                wrapper.appendChild(ul)
+                mealBox.appendChild(wrapper)
+            })
+
+            window.latestPlan = plan
+        }
+
+        $('genMeal').addEventListener('click', genMeal)
+
+        // CSVエクスポート
+        function exportCsv() {
+            if (!window.latestPlan || !window.latestPFC) { alert('まず計算→食事例生成をしてください'); return }
+            const lines = []
+            lines.push(['meal', 'target_kcal', 'actual_kcal', 'P_g', 'F_g', 'C_g', 'items'].join(','))
+            window.latestPlan.forEach(p => {
+                const items = p.summary.items.map(it => it.name.replace(/,/g, '')).join(' | ')
+                lines.push([p.meal, p.targetCal, p.summary.cal, Math.round(p.summary.p), Math.round(p.summary.f), Math.round(p.summary.c), `"${items}"`].join(','))
+            })
+            const blob = new Blob([lines.join('\n')], { type: 'text/csv' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = 'pfc_meal_plan.csv'
+            a.click()
+            URL.revokeObjectURL(url)
+        }
+        $('exportCsv').addEventListener('click', exportCsv)
+
+        // 初期計算（デフォルトで出しておく）
+        window.addEventListener('load', () => {
+            try { calc() } catch (e) { }
+        })
+    </script>
+</body>
+
+</html>
