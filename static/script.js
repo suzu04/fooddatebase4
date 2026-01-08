@@ -1,5 +1,5 @@
 document.getElementById("search-form").addEventListener("submit", function (e) {
-    e.preventDefault();
+    // e.preventDefault();POST されないFlaskに届かない
     const keyword = document.getElementById("keyword").value.trim();
     const tbody = document.querySelector("#results tbody");
     const noResult = document.getElementById("no-result");
