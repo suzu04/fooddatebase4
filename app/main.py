@@ -7,25 +7,55 @@ import os
 # =========================
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "DB", "date.db")
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 print("📁 BASE_DIR =", BASE_DIR)
 print("📁 DB_PATH =", DB_PATH)
 
 app = Flask(
     __name__,
-    static_folder=os.path.join(BASE_DIR, "static"),
-    template_folder=os.path.join(BASE_DIR, "templates")
+    template_folder=TEMPLATE_DIR,
+    static_folder=STATIC_DIR
 )
 
-app.config["TEMPLATES_AUTO_RELOAD"] = True
-
-
 # =========================
-# DB検索関数（カテゴリ対応）
+# DB接続用関数
 # =========================
-def query_db(keyword="", categories=None):
+def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
+    conn.row_factory = sqlite3.Row
+    return conn
+
+# =========================
+# ルート
+# =========================
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/what")
+def what():
+    return render_template("page/what.html")
+
+@app.route("/help")
+def help():
+    return render_template("page/help.html")
+
+@app.route("/answer")
+def answer():
+    return render_template("page/answer.html")
+
+# =========================
+# 検索
+# =========================
+@app.route("/search", methods=["GET", "POST"])
+def search():
+    keyword = request.form.get("keyword", "").strip()
+    categories = request.form.getlist("category[]")
+
+    print("🔍 keyword:", keyword)
+    print("📂 categories:", categories)
 
     sql = """
         SELECT
@@ -47,43 +77,26 @@ def query_db(keyword="", categories=None):
     """
     params = []
 
-    # キーワード検索
+    # キーワード絞り込み
     if keyword:
         sql += " AND name LIKE ?"
         params.append(f"%{keyword}%")
 
-    # カテゴリ検索
+    # チェックボックス絞り込み
     if categories:
-        placeholders = ",".join("?" for _ in categories)
+        placeholders = ",".join(["?"] * len(categories))
         sql += f' AND "group" IN ({placeholders})'
+        # DBの型に合わせる（ここでは文字列として扱う）
         params.extend(categories)
 
+    print("🧠 SQL:", sql)
+    print("📦 params:", params)
+
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute(sql, params)
     rows = cur.fetchall()
     conn.close()
-    return rows
-
-
-# =========================
-# トップページ
-# =========================
-@app.route("/", methods=["GET"])
-def index():
-    return render_template("index.html")
-
-
-# =========================
-# 検索結果ページ
-# =========================
-@app.route("/search", methods=["POST"])
-def search():
-    keyword = request.form.get("keyword", "")
-    categories = request.form.getlist("category[]")
-
-    print("🔍 keyword:", keyword)
-    print("📂 categories:", categories)
-
-    rows = query_db(keyword, categories)
 
     return render_template(
         "page/search_result.html",
@@ -94,69 +107,7 @@ def search():
 
 
 # =========================
-# 静的ページ
-# =========================
-@app.route("/what")
-def what():
-    return render_template("page/what.html")
-
-
-@app.route("/help")
-def help():
-    return render_template("page/help.html")
-
-
-@app.route("/answer")
-def answer():
-    return render_template("page/answer.html")
-
-
-# =========================
-# ダイエットページ（仮）
-# =========================
-@app.route("/diet")
-def diet():
-    rows = query_db()
-    return render_template("page/diet.html", rows=rows)
-
-
-# =========================
-# お気に入り
-# =========================
-@app.route("/favorites")
-def favorites():
-    rows = query_db()
-    return render_template("page/favorites.html", rows=rows)
-
-
-# =========================
-# PFC比較
-# =========================
-@app.route("/pfc-compare")
-def pfc_compare():
-    return render_template("page/pfc-compare.html")
-
-
-# =========================
-# グループ管理
-# =========================
-@app.route("/group-manage")
-def group_manage():
-    return render_template("page/group-manage.html")
-
-
-@app.route("/group-create")
-def group_create():
-    return render_template("page/group-create.html")
-
-
-@app.route("/group-view")
-def group_view():
-    return render_template("page/group-view.html")
-
-
-# =========================
 # 起動
 # =========================
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
