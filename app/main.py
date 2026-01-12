@@ -46,6 +46,40 @@ def help():
 def answer():
     return render_template("page/answer.html")
 
+# DB側で何かする時に使うかも
+# @app.route("/favorites")
+# def favorites():
+#     # 全件取得して後で JS で ★だけ表示
+#     rows = query_db("")
+#     return render_template("page/favorites.html")
+
+@app.route("/favorites")
+def favorites():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("SELECT * FROM items") # ← 全件でOK
+    rows = c.fetchall()
+
+    conn.close()
+    return render_template("page/favorites.html", rows=rows)
+
+@app.route("/group-create")
+def group_create():
+    return render_template("page/group-create.html")
+
+@app.route("/group-list")
+def group_list():
+    return render_template("page/group-list.html")
+
+@app.route("/diet")
+def diet():
+    return render_template("page/diet.html")
+
+@app.route("/pfc-compare")
+def pfc_compare():
+    return render_template("page/pfc-compare.html")
+
 # =========================
 # 検索
 # =========================
