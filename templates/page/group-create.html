@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>保存したグループ</title>
+
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: #f6f7fb;
+            padding: 20px;
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .group-list {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+        }
+
+        .group-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .group-item:last-child {
+            border-bottom: none;
+        }
+
+        a {
+            text-decoration: none;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="group-header">
+        <h2>保存したグループ</h2>
+        <a href="/favorites">🔙 戻る</a>
+    </div>
+
+    <div class="group-list" id="groupList"></div>
+
+    <script>
+        const list = document.getElementById("groupList");
+        let groups = JSON.parse(localStorage.getItem("groups") || "[]");
+
+        function render() {
+            list.innerHTML = "";
+
+            if (groups.length === 0) {
+                list.innerHTML = `<div class="empty">保存されたグループはありません</div>`;
+                return;
+            }
+
+            groups.forEach(g => {
+                const div = document.createElement("div");
+                div.className = "group-item";
+                div.innerHTML = `
+                    <span>■ ${g.name}（${g.items.length}件）</span>
+                    <div>
+                        <a href="/group-view?id=${g.id}">中身を見る</a>
+                        <a data-id="${g.id}" class="del">削除</a>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
+            document.querySelectorAll(".del").forEach(btn => {
+                btn.onclick = e => {
+                    const id = e.target.dataset.id;
+                    if (!confirm("削除しますか？")) return;
+                    groups = groups.filter(g => g.id !== id);
+                    localStorage.setItem("groups", JSON.stringify(groups));
+                    render();
+                };
+            });
+        }
+
+        render();
+    </script>
+
+</body>
+
+</html>

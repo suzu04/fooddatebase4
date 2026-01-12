@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>グループ中身</title>
+
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: #f8fafc;
+            color: #333;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px 0;
+            background: #2f855a;
+            color: white;
+        }
+
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            max-height: 350px;
+            display: block;
+            overflow-y: auto;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #e2f0d9;
+        }
+
+        tbody tr:hover {
+            background: #f0f0f0;
+        }
+
+        .fav {
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1 id="groupTitle">グループ</h1>
+        <a href="/group-create" style="color:white;">🔙 戻る</a>
+    </header>
+
+    <table>
+        <thead>
+            <tr>
+                <th>番号</th>
+                <th>食品名</th>
+                <th>エネルギー(kcal)</th>
+                <th>たんぱく質(g)</th>
+                <th>脂質(g)</th>
+                <th>炭水化物(g)</th>
+                <th>グループ</th>
+            </tr>
+        </thead>
+        <tbody id="groupBody">
+            <!-- JSで生成 -->
+        </tbody>
+    </table>
+
+    <script>
+        // --- URLから group id を取得 ---
+        const params = new URLSearchParams(location.search);
+        const groupId = params.get("id");
+
+        // --- localStorage ---
+        const foods = JSON.parse(localStorage.getItem("foods") || "[]");
+        const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+        const groups = JSON.parse(localStorage.getItem("groups") || "[]");
+
+        const group = groups.find(g => g.id === groupId);
+
+        if (!group) {
+            alert("グループが見つかりません");
+            location.href = "/group-create";
+        }
+
+        // タイトル
+        document.getElementById("groupTitle").textContent =
+            `${group.name}（${group.items.length}件）`;
+
+        const tbody = document.getElementById("groupBody");
+
+        // --- グループ中身描画 ---
+        group.items.forEach(id => {
+            const food = foods.find(f => f.id === id);
+            if (!food) return; // ★ foods が消えても落ちない保険
+
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>${food.id}</td>
+                <td>${food.name}</td>
+                <td>${food.kcal}</td>
+                <td>${food.protein}</td>
+                <td>${food.fat}</td>
+                <td>${food.carb}</td>
+                <td class="fav">${favorites.includes(food.id) ? "★" : "☆"}</td>
+            `;
+
+            // --- ⭐ トグル（foods・groups には一切触らない） ---
+            tr.querySelector(".fav").addEventListener("click", e => {
+                e.stopPropagation();
+
+                const idx = favorites.indexOf(food.id);
+                if (idx === -1) {
+                    favorites.push(food.id);
+                    e.target.textContent = "★";
+                } else {
+                    favorites.splice(idx, 1);
+                    e.target.textContent = "☆";
+                }
+
+                localStorage.setItem("favorites", JSON.stringify(favorites));
+            });
+
+            tbody.appendChild(tr);
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>お気に入り</title>
+</head>
+
+<body>
+
+    <header>
+        <h1>お気に入り</h1>
+        <a href="/">🔙 戻る</a>
+    </header>
+
+    <main>
+        <p style="text-align:left;">お気に入り登録した食品だけを表示します。</p>
+
+        <div class="controls">
+            <button id="resetStars" class="button">⭐ リセット（選択中 <span id="compare-count">0</span> 件）</button>
+            <button id="pfcCompare" class="button">📊 PFC比較へ</button>
+            <button id="group" class="button">グループ化</button>
+            <button class="button" onclick="location.href='/group-create'">グループ化一覧</button>
+        </div>
+
+        <!-- ===== グループ作成モーダル ===== -->
+        <div id="groupModal" class="modal">
+            <div class="modal-content">
+                <h3>グループ作成</h3>
+                <p id="selectedCount">選択中：0件</p>
+                <input type="text" id="groupName" placeholder="グループ名（例：穀物セット）" />
+                <div class="modal-actions">
+                    <button id="saveGroupBtn" class="button">保存</button>
+                    <button id="cancelGroupBtn" class="button gray">キャンセル</button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            body {
+                font-family: 'Noto Sans JP', sans-serif;
+                background: #f8fafc;
+                color: #333;
+            }
+
+            header {
+                text-align: center;
+                padding: 15px 0;
+                background: #2f855a;
+                color: white;
+            }
+
+            table {
+                width: 90%;
+                margin: 20px auto;
+                border-collapse: collapse;
+                max-height: 300px;
+                display: block;
+                overflow-y: auto;
+            }
+
+            th,
+            td {
+                border: 1px solid #ccc;
+                padding: 8px;
+                text-align: center;
+            }
+
+            th {
+                background: #e2f0d9;
+            }
+
+            tbody tr:hover {
+                background: #f0f0f0;
+            }
+
+            .fav {
+                cursor: pointer;
+                font-size: 1.2em;
+            }
+
+            .modal {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.4);
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+
+            .modal-content {
+                background: #fff;
+                padding: 20px;
+                width: 300px;
+                border-radius: 12px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+                text-align: center;
+            }
+
+            .modal-content input {
+                width: 100%;
+                padding: 8px;
+                margin: 10px 0;
+                border-radius: 6px;
+                border: 1px solid #ccc;
+            }
+
+            .modal-actions {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 15px;
+            }
+
+            .button.gray {
+                background: #9ca3af;
+            }
+        </style>
+    </main>
+
+    <table id="favorites-table">
+        <thead>
+            <tr>
+                <th>グループ</th>
+                <th>番号</th>
+                <th>食品名</th>
+                <th>エネルギー(kcal)</th>
+                <th>たんぱく質(g)</th>
+                <th>脂質(g)</th>
+                <th>炭水化物(g)</th>
+                <th>お気に入り</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr class="food-row" data-id="{{ row[1] }}">
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>{{ row[4] }}</td>
+                <td>{{ row[5] }}</td>
+                <td>{{ row[6] }}</td>
+                <td class="fav" data-id="{{ row[1] }}">☆</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script src="{{ url_for('static', filename='favorite.js') }}" defer></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const favIds = JSON.parse(localStorage.getItem("favorites") || "[]");
+            let count = 0;
+
+            document.querySelectorAll("#favorites-table tbody tr.food-row").forEach(row => {
+                const id = row.dataset.id;
+
+                if (!favIds.map(String).includes(id)) {
+                    row.remove();
+                } else {
+                    row.querySelector(".fav").textContent = "★";
+                    count++;
+                }
+            });
+
+            const compareCount = document.getElementById("compare-count");
+            if (compareCount) compareCount.textContent = count;
+        });
+    </script>
+
+
+    <script>
+        const modal = document.getElementById("groupModal");
+        const groupNameInput = document.getElementById("groupName");
+        const selectedCount = document.getElementById("selectedCount");
+        let groupMode = false;
+
+        document.getElementById("group").addEventListener("click", () => {
+            const table = document.getElementById("favorites-table");
+
+            if (!groupMode) {
+                groupMode = true;
+                const headRow = table.querySelector("thead tr");
+                const th = document.createElement("th");
+                th.textContent = "選択";
+                headRow.insertBefore(th, headRow.firstChild);
+
+                table.querySelectorAll("tbody tr").forEach(tr => {
+                    const td = document.createElement("td");
+                    td.innerHTML = `<input type="checkbox" class="group-select" id="${tr.dataset.id}">`;
+                    tr.insertBefore(td, tr.firstChild);
+                });
+
+                document.getElementById("group").textContent = "グループ保存";
+                return;
+            }
+
+            const selected = document.querySelectorAll(".group-select:checked");
+            if (selected.length === 0) {
+                alert("食品を選択してください");
+                return;
+            }
+
+            selectedCount.textContent = `選択中：${selected.length}件`;
+            modal.style.display = "flex";
+        });
+
+        document.getElementById("cancelGroupBtn").onclick = () => {
+            modal.style.display = "none";
+            groupNameInput.value = "";
+        };
+
+        document.getElementById("saveGroupBtn").onclick = () => {
+            const name = groupNameInput.value.trim();
+            if (!name) {
+                alert("グループ名を入力してください");
+                return;
+            }
+
+            const ids = Array.from(document.querySelectorAll(".group-select:checked")).map(c => c.dataset.id);
+            const groups = JSON.parse(localStorage.getItem("groups") || "[]");
+
+            groups.push({
+                id: "grp_" + Date.now(),
+                name,
+                items: ids
+            });
+
+            localStorage.setItem("groups", JSON.stringify(groups));
+            alert("グループを保存しました");
+            modal.style.display = "none";
+            groupNameInput.value = "";
+        };
+    </script>
+
+</body>
+
+</html>

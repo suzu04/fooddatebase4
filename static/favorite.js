@@ -3,10 +3,11 @@
 // ===========================
 const STORAGE_KEY_FAV = "favorites";
 const STORAGE_KEY_TAG = "tags";
+const STORAGE_KEY_GROUP = "groups";
 
 
 // ===========================
-// ⭐ お気に入りデータ GET / SAVE
+// ⭐ お気に入り GET / SAVE
 // ===========================
 function getFavorites() {
     try {
@@ -22,10 +23,10 @@ function saveFavorites(list) {
 
 
 // ===========================
-// ⭐ お気に入りのDOM反映
+// ⭐ 星の描画
 // ===========================
 function renderFavoriteStars() {
-    const favIds = getFavorites();
+    const favIds = getFavorites().map(String);
 
     document.querySelectorAll(".fav").forEach(td => {
         const id = td.dataset.id;
@@ -37,27 +38,13 @@ function renderFavoriteStars() {
 
 
 // ===========================
-// ⭐ 初期化
-// ===========================
-document.addEventListener("DOMContentLoaded", () => {
-    renderFavoriteStars();
-    addFavoriteToggle();
-
-    loadTags();
-    addTagEditButtons();
-});
-
-
-// ===========================
-// ⭐ トグル機能
+// ⭐ 星トグル
 // ===========================
 function addFavoriteToggle() {
-    const favCells = document.querySelectorAll(".fav");
-
-    favCells.forEach(td => {
-        td.onclick = () => {
+    document.querySelectorAll(".fav").forEach(td => {
+        td.addEventListener("click", () => {
             const id = td.dataset.id;
-            let favIds = getFavorites();
+            let favIds = getFavorites().map(String);
 
             if (favIds.includes(id)) {
                 favIds = favIds.filter(x => x !== id);
@@ -69,23 +56,56 @@ function addFavoriteToggle() {
 
             saveFavorites(favIds);
             updateCompareCount();
-        };
+        });
     });
 }
 
 
 // ===========================
-// ⭐ 選択数の表示更新
+// ⭐ 件数表示
 // ===========================
 function updateCompareCount() {
-    const favIds = getFavorites();
     const span = document.getElementById("compare-count");
-    if (span) span.textContent = favIds.length;
+    if (!span) return;
+    span.textContent = getFavorites().length;
 }
 
 
 // ===========================
-// ⭐ タグ管理（保存/読み込み）
+// ⭐ リセット
+// ===========================
+function setupResetButton() {
+    const resetBtn = document.getElementById("resetStars");
+    if (!resetBtn) return;
+
+    resetBtn.addEventListener("click", () => {
+        saveFavorites([]);
+        document.querySelectorAll(".fav").forEach(td => td.textContent = "☆");
+        updateCompareCount();
+    });
+}
+
+
+// ===========================
+// 📊 PFC比較へ
+// ===========================
+function setupPfcButton() {
+    const btn = document.getElementById("pfcCompare");
+    if (!btn) return;
+
+    btn.addEventListener("click", () => {
+        const ids = getFavorites();
+        if (ids.length === 0) {
+            alert("食品が選択されていません");
+            return;
+        }
+        location.href = "/pfc-compare?ids=" + ids.join(",");
+    });
+}
+
+
+// ===========================
+// 🏷 タグ管理
 // ===========================
 function getTags() {
     try {
@@ -102,101 +122,68 @@ function saveTags(tags) {
 function loadTags() {
     const tags = getTags();
 
-    Object.keys(tags).forEach(id => {
+    Object.entries(tags).forEach(([id, list]) => {
         const row = document.querySelector(`tr[data-id="${id}"]`);
         if (!row) return;
 
-        const tagArea = row.querySelector(".tag-area");
-        if (tagArea) {
-            tagArea.innerHTML = tags[id].map(t => `<span class="tag">${t}</span>`).join("");
+        const area = row.querySelector(".tag-area");
+        if (area) {
+            area.innerHTML = list.map(t => `<span class="tag">${t}</span>`).join("");
         }
     });
 }
 
+function openTagModal(id) {
+    const tags = getTags();
+    const current = tags[id] || [];
+
+    const input = prompt(
+        "タグをカンマ区切りで入力",
+        current.join(",")
+    );
+    if (input === null) return;
+
+    tags[id] = input.split(",").map(t => t.trim()).filter(Boolean);
+    saveTags(tags);
+    loadTags();
+}
+
 function addTagEditButtons() {
-    document.querySelectorAll("tr[data-id]").forEach(row => {
-        const id = row.dataset.id;
-        const btn = row.querySelector(".tag-edit");
-
-        if (!btn) return;
-
-        btn.onclick = () => openTagModal(id);
+    document.querySelectorAll(".tag-edit").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const row = btn.closest("tr");
+            if (!row) return;
+            openTagModal(row.dataset.id);
+        });
     });
 }
 
 
 // ===========================
-// ⭐ タグ編集モーダル
+// 📦 グループ
 // ===========================
-function openTagModal(id) {
-    const tags = getTags();
-    const currentTags = tags[id] || [];
-
-    const tagText = prompt(
-        "この食材のタグをカンマ区切りで入力:\n例: 高タンパク, 低脂質",
-        currentTags.join(",")
-    );
-
-    if (tagText === null) return;
-
-    const newTags = tagText
-        .split(",")
-        .map(t => t.trim())
-        .filter(t => t);
-
-    tags[id] = newTags;
-    saveTags(tags);
-
-    loadTags();
-}
-
-// ===========================
-// ⭐ リセットボタン
-// ===========================
-document.addEventListener("DOMContentLoaded", () => {
-    const resetBtn = document.getElementById("resetStars");
-    if (resetBtn) {
-        resetBtn.onclick = () => {
-            // お気に入りをすべて削除
-            saveFavorites([]);
-
-            // 全ての星を「☆」に戻す
-            document.querySelectorAll(".fav").forEach(td => {
-                td.textContent = "☆";
-            });
-
-            // 件数を 0 に更新
-            updateCompareCount();
-        };
-    }
-});
-
-
-// ===========================
-// 📊 PFC比較へ
-// ===========================
-document.addEventListener("DOMContentLoaded", () => {
-    const pfcBtn = document.getElementById("pfcCompare");
-    if (pfcBtn) {
-        pfcBtn.onclick = () => {
-            const favIds = getFavorites();
-
-            // IDの配列 → 1,23,55 のように結合
-            const url = "/pfc-compare?ids=" + favIds.join(",");
-
-            // ページ移動
-            window.location.href = url;
-        };
-    }
-});
-
-// グループ操作用の共通関数
 function loadGroups() {
-    return JSON.parse(localStorage.getItem("groups") || "{}");
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY_GROUP) || "[]");
+    } catch {
+        return [];
+    }
 }
 
 function saveGroups(groups) {
-    localStorage.setItem("groups", JSON.stringify(groups));
+    localStorage.setItem(STORAGE_KEY_GROUP, JSON.stringify(groups));
 }
 
 
+// ===========================
+// ⭐ 初期化
+// ===========================
+document.addEventListener("DOMContentLoaded", () => {
+    renderFavoriteStars();
+    addFavoriteToggle();
+    setupResetButton();
+    setupPfcButton();
+
+    loadTags();
+    addTagEditButtons();
+});
