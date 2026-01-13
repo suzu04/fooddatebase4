@@ -32,12 +32,7 @@ def get_db_connection():
 # =========================
 @app.route("/")
 def index():
-    conn = get_db_connection()
-    foods = conn.execute("SELECT * FROM items").fetchall()
-    conn.close()
-
-    foods_list = [dict(row) for row in foods]  # dict に変換
-    return render_template("index.html", all_foods=foods_list)
+    return render_template("index.html")
 
 @app.route("/what")
 def what():
@@ -51,10 +46,21 @@ def help():
 def answer():
     return render_template("page/answer.html")
 
+# DB側で何かする時に使うかも
+# @app.route("/favorites")
+# def favorites():
+#     # 全件取得して後で JS で ★だけ表示
+#     rows = query_db("")
+#     return render_template("page/favorites.html")
+
 @app.route("/favorites")
 def favorites():
-    conn = get_db_connection()
-    rows = conn.execute("SELECT * FROM items").fetchall()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute("SELECT * FROM items") # ← 全件でOK
+    rows = c.fetchall()
+
     conn.close()
     return render_template("page/favorites.html", rows=rows)
 
@@ -109,13 +115,16 @@ def search():
     """
     params = []
 
+    # キーワード絞り込み
     if keyword:
         sql += " AND name LIKE ?"
         params.append(f"%{keyword}%")
 
+    # チェックボックス絞り込み
     if categories:
         placeholders = ",".join(["?"] * len(categories))
         sql += f' AND "group" IN ({placeholders})'
+        # DBの型に合わせる（ここでは文字列として扱う）
         params.extend(categories)
 
     print("🧠 SQL:", sql)
@@ -133,6 +142,7 @@ def search():
         keyword=keyword,
         categories=categories
     )
+
 
 # =========================
 # 起動
