@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>保存したグループ</title>
+
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: #f6f7fb;
+            padding: 20px;
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .group-list {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+        }
+
+        .group-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .group-item:last-child {
+            border-bottom: none;
+        }
+
+        a {
+            text-decoration: none;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .create-box {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 6px;
+            width: 200px;
+        }
+
+        button {
+            padding: 6px 12px;
+            margin-left: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="group-header">
+        <h2>保存したグループ</h2>
+        <a href="/favorites">🔙 戻る</a>
+    </div>
+
+    <!-- グループ作成 -->
+    <div class="create-box">
+        <input type="text" id="groupName" placeholder="グループ名">
+        <button id="createBtn">グループ作成</button>
+    </div>
+
+    <div class="group-list" id="groupList"></div>
+
+    <script>
+        // ===== 初期化 =====
+        if (!localStorage.getItem("groups")) {
+            localStorage.setItem("groups", JSON.stringify([]));
+        }
+        if (!localStorage.getItem("favorites")) {
+            localStorage.setItem("favorites", JSON.stringify([]));
+        }
+
+        let groups = JSON.parse(localStorage.getItem("groups"));
+        const favorites = JSON.parse(localStorage.getItem("favorites"));
+        const list = document.getElementById("groupList");
+
+        // ===== グループ作成（超重要）=====
+        document.getElementById("createBtn").onclick = () => {
+            const name = document.getElementById("groupName").value.trim();
+            if (!name) {
+                alert("グループ名を入力してください");
+                return;
+            }
+            if (favorites.length === 0) {
+                alert("お気に入りが空です");
+                return;
+            }
+
+            // ★ number だけを保存する（null撲滅）
+            const items = favorites.map(n => Number(n)).filter(n => !Number.isNaN(n));
+
+            const group = {
+                id: "grp_" + Date.now(),
+                name,
+                items
+            };
+
+            groups.push(group);
+            localStorage.setItem("groups", JSON.stringify(groups));
+
+            document.getElementById("groupName").value = "";
+            render();
+        };
+
+        // ===== 表示 =====
+        function render() {
+            list.innerHTML = "";
+
+            if (groups.length === 0) {
+                list.innerHTML = `<div class="empty">保存されたグループはありません</div>`;
+                return;
+            }
+
+            groups.forEach(g => {
+                const div = document.createElement("div");
+                div.className = "group-item";
+                div.innerHTML = `
+                    <span>■ ${g.name}（${g.items.length}件）</span>
+                    <div>
+                        <a href="/group-view?id=${g.id}">中身を見る</a>
+                        <a data-id="${g.id}" class="del">削除</a>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
+            document.querySelectorAll(".del").forEach(btn => {
+                btn.onclick = e => {
+                    const id = e.target.dataset.id;
+                    if (!confirm("削除しますか？")) return;
+                    groups = groups.filter(g => g.id !== id);
+                    localStorage.setItem("groups", JSON.stringify(groups));
+                    render();
+                };
+            });
+        }
+
+        render();
+    </script>
+
+</body>
+
+</html>

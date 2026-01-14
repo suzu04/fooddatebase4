@@ -56,6 +56,13 @@
 </head>
 
 <body>
+    <script>
+        // Flask から渡された全食品データを localStorage に保存
+        const foods = {{ all_foods | tojson }};
+        localStorage.setItem("foods", JSON.stringify(foods));
+        console.log("✅ foods saved to localStorage:", foods);
+    </script>
+
     <!-- ヘッダー -->
     <header>
         <div>

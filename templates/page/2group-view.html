@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>グループ内容</title>
+</head>
+
+<body>
+    <header>
+        <h1 id="group-title">グループ</h1>
+        <a href="/group-create">🔙 戻る</a>
+    </header>
+
+    <table id="group-table">
+        <thead>
+            <tr>
+                <th>番号</th>
+                <th>食品名</th>
+                <th>エネルギー(kcal)</th>
+                <th>たんぱく質(g)</th>
+                <th>脂質(g)</th>
+                <th>炭水化物(g)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr data-id="{{ row[1] }}">
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>{{ row[4] }}</td>
+                <td>{{ row[5] }}</td>
+                <td>{{ row[6] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: #f8fafc;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px;
+            background: #2f855a;
+            color: white;
+        }
+
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #e2f0d9;
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const params = new URLSearchParams(location.search);
+            const groupId = params.get("id");
+
+            const groups = JSON.parse(localStorage.getItem("groups") || "[]");
+            const group = groups.find(g => g.id === groupId);
+            if (!group) return;
+
+            document.getElementById("group-title").textContent = group.name;
+
+            document.querySelectorAll("#group-table tbody tr").forEach(tr => {
+                if (!group.items.includes(tr.dataset.id)) {
+                    tr.remove();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -76,8 +76,14 @@
             display: block;
         }
 
-        .sort-arrow {
-            margin-left: 5px;
+        .section {
+            margin: 10px 0;
+            text-align: left;
+        }
+
+        .divider {
+            border-bottom: 1px solid #ccc;
+            margin: 10px 0;
         }
     </style>
 </head>
@@ -89,54 +95,69 @@
     </header>
 
     <main>
-
-        <p style="text-align:left;">100gあたりの栄養素を確認できます</p>
-
-        <!-- ▼ 列の表示/非表示 -->
-        <div class="dropdown" id="columnDropdown">
-            <button class="dropdown-btn">表示する列を選択 ▼</button>
-            <div class="dropdown-content">
-                <label><input type="checkbox" data-col="0" checked> グループ</label>
-                <label><input type="checkbox" data-col="1" checked> 番号</label>
-                <label><input type="checkbox" data-col="2" checked> 食品名</label>
-                <label><input type="checkbox" data-col="3" checked> エネルギー(kcal)</label>
-                <label><input type="checkbox" data-col="4" checked> たんぱく質(g)</label>
-                <label><input type="checkbox" data-col="5" checked> 脂質(g)</label>
-                <label><input type="checkbox" data-col="6" checked> 炭水化物(g)</label>
-
-                <!-- デフォルト非表示 -->
-                <label><input type="checkbox" data-col="7"> ナトリウム(mg)</label>
-                <label><input type="checkbox" data-col="8"> カリウム(mg)</label>
-                <label><input type="checkbox" data-col="9"> カルシウム(mg)</label>
-                <label><input type="checkbox" data-col="10"> マグネシウム(mg)</label>
-                <label><input type="checkbox" data-col="11"> リン(mg)</label>
-                <label><input type="checkbox" data-col="12"> 鉄(mg)</label>
-            </div>
-        </div>
-
-        <div class="controls">
-            <button id="resetStars" class="button">⭐ リセット（選択中 <span id="compare-count">0</span> 件）</button>
+        <h2 style="text-align:left;">「{{ keyword }}」の検索結果</h2>
+        <!-- 前提説明 -->
+        <div class="section">
+            <p>本ページでは、100gあたりの栄養成分を基準に表示しています。</p>
         </div>
 
         {% if rows %}
-        <h2 style="text-align:left;">「{{ keyword }}」の検索結果</h2>
+        <!-- 分量操作 -->
+        <div class="section">
+            <p>分量（g）を変更すると、表示される栄養成分量が自動で再計算されます。</p>
+            <p>
+                分量（g）:
+                <input type="number" id="gramInput" value="100" min="1" style="width:80px;"> g
+                <button id="applyGram">計算</button>
+                <button id="resetGram">100gに戻す</button>
+            </p>
+        </div>
 
+        <div class="divider"></div>
+
+        <!-- 表示オプション -->
+        <div class="section">
+            <div class="dropdown" id="columnDropdown">
+                <button class="dropdown-btn">表示する列を選択 ▼</button>
+                <div class="dropdown-content">
+                    <label><input type="checkbox" data-col="0" checked> グループ</label>
+                    <label><input type="checkbox" data-col="1" checked> 番号</label>
+                    <label><input type="checkbox" data-col="2" checked> 食品名</label>
+                    <label><input type="checkbox" data-col="3" checked> エネルギー(kcal)</label>
+                    <label><input type="checkbox" data-col="4" checked> たんぱく質(g)</label>
+                    <label><input type="checkbox" data-col="5" checked> 脂質(g)</label>
+                    <label><input type="checkbox" data-col="6" checked> 炭水化物(g)</label>
+                    <label><input type="checkbox" data-col="7"> ナトリウム(mg)</label>
+                    <label><input type="checkbox" data-col="8"> カリウム(mg)</label>
+                    <label><input type="checkbox" data-col="9"> カルシウム(mg)</label>
+                    <label><input type="checkbox" data-col="10"> マグネシウム(mg)</label>
+                    <label><input type="checkbox" data-col="11"> リン(mg)</label>
+                    <label><input type="checkbox" data-col="12"> 鉄(mg)</label>
+                </div>
+            </div>
+
+            <button id="resetStars">
+                ⭐ リセット（選択中 <span id="compare-count">0</span> 件）
+            </button>
+        </div>
+
+        <!-- テーブル -->
         <table id="foodTable">
             <thead>
                 <tr>
-                    <th>グループ <span class="sort-arrow">▼</span></th>
-                    <th>番号 <span class="sort-arrow">▼</span></th>
-                    <th>食品名 <span class="sort-arrow">▼</span></th>
-                    <th>エネルギー(kcal) <span class="sort-arrow">▼</span></th>
-                    <th>たんぱく質(g) <span class="sort-arrow">▼</span></th>
-                    <th>脂質(g) <span class="sort-arrow">▼</span></th>
-                    <th>炭水化物(g) <span class="sort-arrow">▼</span></th>
-                    <th>ナトリウム(mg) <span class="sort-arrow">▼</span></th>
-                    <th>カリウム(mg) <span class="sort-arrow">▼</span></th>
-                    <th>カルシウム(mg) <span class="sort-arrow">▼</span></th>
-                    <th>マグネシウム(mg) <span class="sort-arrow">▼</span></th>
-                    <th>リン(mg) <span class="sort-arrow">▼</span></th>
-                    <th>鉄(mg) <span class="sort-arrow">▼</span></th>
+                    <th>グループ</th>
+                    <th>番号</th>
+                    <th>食品名</th>
+                    <th>エネルギー(kcal)</th>
+                    <th>たんぱく質(g)</th>
+                    <th>脂質(g)</th>
+                    <th>炭水化物(g)</th>
+                    <th>ナトリウム(mg)</th>
+                    <th>カリウム(mg)</th>
+                    <th>カルシウム(mg)</th>
+                    <th>マグネシウム(mg)</th>
+                    <th>リン(mg)</th>
+                    <th>鉄(mg)</th>
                     <th>お気に入り</th>
                 </tr>
             </thead>
@@ -157,82 +178,113 @@
         <p style="text-align:center;">「{{ keyword }}」に一致する結果はありません。</p>
         {% endif %}
 
-
-
     </main>
-
 
     <footer>
         © 2025 Japan Science and Technology Agency. All rights reserved.
     </footer>
 
+    <script src="/static/favorite.js"></script>
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const table = document.getElementById("foodTable");
 
-            // ▼ 初期非表示列（表示したい列以外を非表示）
-            function initialHide() {
-                const showColumns = [0, 1, 2, 3, 4, 5, 6, 13]; // 初期表示列のインデックス
-                document.querySelectorAll("#foodTable tr").forEach(row => {
-                    row.querySelectorAll("td, th").forEach((cell, idx) => {
-                        if (!showColumns.includes(idx)) cell.style.display = "none";
+            const nutritionCols = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+            /* 100g基準値を保存 */
+            document.querySelectorAll("#foodTable tbody tr").forEach(row => {
+                nutritionCols.forEach(idx => {
+                    const cell = row.children[idx];
+                    if (!cell) return;
+
+                    const value = parseFloat(cell.innerText);
+                    if (!isNaN(value)) {
+                        cell.dataset.baseValue = value;
+                    }
+                });
+            });
+
+            /* 分量計算 */
+            function applyGram(gram) {
+                const rate = gram / 100;
+
+                document.querySelectorAll("#foodTable tbody tr").forEach(row => {
+                    nutritionCols.forEach(idx => {
+                        const cell = row.children[idx];
+                        if (!cell || !cell.dataset.baseValue) return;
+
+                        const base = parseFloat(cell.dataset.baseValue);
+                        const newValue = base * rate;
+
+                        cell.innerText = Number.isInteger(base)
+                            ? Math.round(newValue)
+                            : newValue.toFixed(2);
                     });
                 });
             }
-            initialHide();
 
-
-            // ▼ チェックボックスで列表示/非表示
-            document.querySelectorAll(".dropdown-content input[type='checkbox']").forEach(chk => {
-                chk.addEventListener("change", () => {
-                    const col = chk.dataset.col;
-                    const show = chk.checked;
-                    document.querySelectorAll(`#foodTable tr`).forEach(row => {
-                        const cell = row.children[col];
-                        if (cell) cell.style.display = show ? "" : "none";
-                    });
-                });
+            document.getElementById("applyGram").addEventListener("click", () => {
+                const gram = parseFloat(document.getElementById("gramInput").value);
+                if (!isNaN(gram) && gram > 0) {
+                    applyGram(gram);
+                }
             });
 
-            // ▼ ドロップダウン開閉
-            document.querySelector(".dropdown-btn").addEventListener("click", () => {
-                document.getElementById("columnDropdown").classList.toggle("show");
+            document.getElementById("resetGram").addEventListener("click", () => {
+                document.getElementById("gramInput").value = 100;
+                applyGram(100);
             });
 
-            // ▼ ソート機能（▽▲表示）
-            document.querySelectorAll("th").forEach((th, index) => {
-                const arrow = th.querySelector(".sort-arrow");
-                th.addEventListener("click", () => {
-                    const tbody = table.querySelector("tbody");
-                    const rows = Array.from(tbody.querySelectorAll("tr"));
-                    const currentOrder = th.dataset.order === "asc" ? "desc" : "asc";
-                    th.dataset.order = currentOrder;
-
-                    // 他の列の矢印リセット
-                    document.querySelectorAll("th .sort-arrow").forEach(a => {
-                        if (a !== arrow) a.textContent = "";
-                    });
-
-                    arrow.textContent = currentOrder === "asc" ? "▲" : "▼";
-
-                    rows.sort((a, b) => {
-                        const A = a.children[index].innerText;
-                        const B = b.children[index].innerText;
-                        const numA = parseFloat(A);
-                        const numB = parseFloat(B);
-                        if (!isNaN(numA) && !isNaN(numB)) {
-                            return currentOrder === "asc" ? numA - numB : numB - numA;
-                        }
-                        return currentOrder === "asc" ? A.localeCompare(B) : B.localeCompare(A);
-                    });
-
-                    tbody.innerHTML = "";
-                    rows.forEach(r => tbody.appendChild(r));
-                });
+            document.getElementById("gramInput").addEventListener("keydown", e => {
+                if (e.key === "Enter") {
+                    document.getElementById("applyGram").click();
+                }
             });
         });
     </script>
-    <script src="/static/favorite.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            /* ===============================
+               ▼ 表示列ON / OFF
+            =============================== */
+            const checkboxes = document.querySelectorAll(".dropdown-content input[type='checkbox']");
+            const table = document.getElementById("foodTable");
+
+            checkboxes.forEach(cb => {
+                cb.addEventListener("change", () => {
+                    const colIndex = parseInt(cb.dataset.col);
+
+                    // th
+                    table.querySelectorAll("thead th")[colIndex].style.display =
+                        cb.checked ? "" : "none";
+
+                    // td
+                    table.querySelectorAll("tbody tr").forEach(row => {
+                        row.children[colIndex].style.display =
+                            cb.checked ? "" : "none";
+                    });
+                });
+            });
+
+            /* ===============================
+               ▼ ドロップダウン開閉
+            =============================== */
+            const dropdown = document.getElementById("columnDropdown");
+            const dropdownBtn = dropdown.querySelector(".dropdown-btn");
+
+            dropdownBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle("show");
+            });
+
+            document.addEventListener("click", () => {
+                dropdown.classList.remove("show");
+            });
+
+        });
+    </script>
+
 </body>
 
 </html>

@@ -67,91 +67,74 @@
                 <th>たんぱく質(g)</th>
                 <th>脂質(g)</th>
                 <th>炭水化物(g)</th>
-                <th>お気に入り</th>
+                <th>グループ</th>
             </tr>
         </thead>
-        <tbody id="groupBody"></tbody>
+        <tbody id="groupBody">
+            <!-- JSで生成 -->
+        </tbody>
     </table>
 
     <script>
-        // =====================
-        // 初期化
-        // =====================
-        if (!localStorage.getItem("foods")) {
-            localStorage.setItem("foods", "[]");
-        }
-        if (!localStorage.getItem("favorites")) {
-            localStorage.setItem("favorites", "[]");
-        }
-        if (!localStorage.getItem("groups")) {
-            localStorage.setItem("groups", "[]");
-        }
-
-        // =====================
-        // foods（サーバー → localStorage）
-        // =====================
+        // --- Flask から渡された foods を保存（最初にやる） ---
         const foodsFromServer = {{ all_foods | tojson }};
         localStorage.setItem("foods", JSON.stringify(foodsFromServer));
 
-        const foods = JSON.parse(localStorage.getItem("foods"));
-        const favorites = JSON.parse(localStorage.getItem("favorites"));
-        const groups = JSON.parse(localStorage.getItem("groups"));
-
-        // =====================
-        // group 取得
-        // =====================
+        // --- URLから group id を取得 ---
         const params = new URLSearchParams(location.search);
         const groupId = params.get("id");
 
-        const group = groups.find(g => String(g.id) === String(groupId));
+        // --- localStorage ---
+        const foods = foodsFromServer; // ← 直接使う（再parse不要）
+        const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+        const groups = JSON.parse(localStorage.getItem("groups") || "[]");
+
+        const group = groups.find(g => g.id === groupId);
 
         if (!group) {
             alert("グループが見つかりません");
             location.href = "/group-create";
         }
 
+        // タイトル
         document.getElementById("groupTitle").textContent =
             `${group.name}（${group.items.length}件）`;
 
         const tbody = document.getElementById("groupBody");
 
-        // =====================
-        // 描画
-        // =====================
-        group.items.forEach(number => {
-            const food = foods.find(f => String(f.number) === String(number));
+        // --- グループ中身描画 ---
+        group.items.forEach(id => {
+            const food = foods.find(f => f.id === id);
             if (!food) return;
 
-            const isFav = favorites.includes(food.number);
-
             const tr = document.createElement("tr");
+
             tr.innerHTML = `
-                <td>${food.number}</td>
-                <td>${food.name}</td>
-                <td>${food.enerc_kcal ?? ""}</td>
-                <td>${food.prot_ ?? ""}</td>
-                <td>${food.fat_ ?? ""}</td>
-                <td>${food.choavlm ?? ""}</td>
-                <td class="fav">${isFav ? "★" : "☆"}</td>
-            `;
+            <td>${food.id}</td>
+            <td>${food.name}</td>
+            <td>${food.kcal}</td>
+            <td>${food.protein}</td>
+            <td>${food.fat}</td>
+            <td>${food.carb}</td>
+            <td class="fav">${favorites.includes(food.id) ? "★" : "☆"}</td>
+        `;
 
             tr.querySelector(".fav").addEventListener("click", e => {
-                const idx = favorites.indexOf(food.number);
-
+                const idx = favorites.indexOf(food.id);
                 if (idx === -1) {
-                    favorites.push(food.number);
+                    favorites.push(food.id);
                     e.target.textContent = "★";
                 } else {
                     favorites.splice(idx, 1);
                     e.target.textContent = "☆";
                 }
-
                 localStorage.setItem("favorites", JSON.stringify(favorites));
             });
 
             tbody.appendChild(tr);
         });
     </script>
+
 
 </body>
 

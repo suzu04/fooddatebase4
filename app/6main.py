@@ -78,18 +78,15 @@ def group_list():
 # @app.route("/group-view")
 # def group_view():
 #     return render_template("page/group-view.html")
+
 @app.route("/group-view")
 def group_view():
-    conn = get_db_connection()
-    rows = conn.execute("SELECT * FROM items").fetchall()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT * FROM items")
+    rows = c.fetchall()
     conn.close()
-
-    all_foods = [dict(row) for row in rows]
-
-    return render_template(
-        "page/group-view.html",
-        all_foods=all_foods
-    )
+    return render_template("page/group-view.html", rows=rows)
 
 
 
