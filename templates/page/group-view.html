@@ -122,7 +122,8 @@
             const food = foods.find(f => String(f.number) === String(number));
             if (!food) return;
 
-            const isFav = favorites.includes(food.number);
+            const isFav = favorites.includes(String(food.number));
+
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
@@ -136,10 +137,11 @@
             `;
 
             tr.querySelector(".fav").addEventListener("click", e => {
-                const idx = favorites.indexOf(food.number);
+                const idx = favorites.indexOf(String(food.number));
+
 
                 if (idx === -1) {
-                    favorites.push(food.number);
+                    favorites.push(String(food.number));
                     e.target.textContent = "★";
                 } else {
                     favorites.splice(idx, 1);
