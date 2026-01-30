@@ -78,6 +78,7 @@ def group_list():
 # @app.route("/group-view")
 # def group_view():
 #     return render_template("page/group-view.html")
+
 @app.route("/group-view")
 def group_view():
     conn = get_db_connection()
@@ -93,9 +94,76 @@ def group_view():
 
 
 
+# @app.route("/diet")
+# def diet():
+#     return render_template("page/diet.html")
+
+# @app.route("/diet")
+# def diet():
+#     conn = get_db_connection()
+#     foods = conn.execute("SELECT * FROM items").fetchall()
+#     conn.close()
+
+#     all_foods = [dict(f) for f in foods]
+
+#     return render_template(
+#         "page/diet.html",
+#         all_foods=all_foods
+#     )
+
+# @app.route("/diet")
+# def diet():
+#     conn = get_db_connection()
+#     rows = conn.execute("""
+#         SELECT
+#             "group",
+#             number,
+#             name,
+#             enerc_kcal,
+#             prot_,
+#             fat_,
+#             choavlm,
+#             na,
+#             k,
+#             ca,
+#             mg,
+#             p,
+#             fe
+#         FROM items
+#     """).fetchall()
+#     conn.close()
+
+#     return render_template("page/diet.html", rows=rows)
+
 @app.route("/diet")
 def diet():
-    return render_template("page/diet.html")
+    conn = get_db_connection()
+    rows = conn.execute("""
+        SELECT
+            "group",
+            number,
+            name,
+            enerc_kcal,
+            prot_,
+            fat_,
+            choavlm,
+            na,
+            k,
+            ca,
+            mg,
+            p,
+            fe
+        FROM items
+    """).fetchall()
+    conn.close()
+
+    # ★ここが必須
+    rows = [dict(row) for row in rows]
+
+    return render_template("page/diet.html", rows=rows)
+
+
+
 
 @app.route("/pfc-compare")
 def pfc_compare():

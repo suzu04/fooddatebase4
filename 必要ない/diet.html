@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>筋トレ向けランキング（高タンパク質・低脂質）</title>
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: #f8fafc;
+            color: #333;
+        }
+
+        header,
+        footer {
+            text-align: center;
+            padding: 15px 0;
+        }
+
+        header {
+            background: #2f855a;
+            color: white;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .dropdown-btn {
+            padding: 8px 12px;
+            background: #4caf50;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            z-index: 10;
+            width: 200px;
+        }
+
+        .dropdown-content label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .dropdown.show .dropdown-content {
+            display: block;
+        }
+
+        table {
+            width: 95%;
+            border-collapse: collapse;
+            margin: 20px auto;
+            text-align: center;
+
+            /* ★ 上位5件のみスクロール表示 ★ */
+            max-height: 300px;
+            display: block;
+            overflow-y: auto;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 6px;
+        }
+
+        th {
+            background: #e2f0d9;
+            cursor: pointer;
+            position: sticky;
+            top: 0;
+        }
+
+        .sort-arrow {
+            margin-left: 5px;
+        }
+
+        .fav {
+            cursor: pointer;
+            font-size: 1.3em;
+        }
+
+        /* .button {
+            padding: 8px 12px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        } */
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>筋トレ向けランキング（高タンパク質・低脂質）</h1>
+        <a href="/">🔙 戻る</a>
+    </header>
+
+    <main>
+
+        <p style="text-align:left;">100gあたりの栄養素を比較しながら、筋トレに適した食品をチェックできます。</p>
+
+        <!-- ▼ 列の表示/非表示 -->
+        <div class="dropdown" id="columnDropdown">
+            <button class="dropdown-btn">表示する列を選択 ▼</button>
+            <div class="dropdown-content">
+                <label><input type="checkbox" data-col="0" checked> グループ</label>
+                <label><input type="checkbox" data-col="1" checked> 番号</label>
+                <label><input type="checkbox" data-col="2" checked> 食品名</label>
+                <label><input type="checkbox" data-col="3" checked> エネルギー(kcal)</label>
+                <label><input type="checkbox" data-col="4" checked> たんぱく質(g)</label>
+                <label><input type="checkbox" data-col="5" checked> 脂質(g)</label>
+                <label><input type="checkbox" data-col="6" checked> 炭水化物(g)</label>
+
+                <!-- デフォルト非表示 -->
+                <label><input type="checkbox" data-col="7"> ナトリウム(mg)</label>
+                <label><input type="checkbox" data-col="8"> カリウム(mg)</label>
+                <label><input type="checkbox" data-col="9"> カルシウム(mg)</label>
+                <label><input type="checkbox" data-col="10"> マグネシウム(mg)</label>
+                <label><input type="checkbox" data-col="11"> リン(mg)</label>
+                <label><input type="checkbox" data-col="12"> 鉄(mg)</label>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="resetStars" class="button">⭐ リセット（選択中 <span id="compare-count">0</span> 件）</button>
+            <button id="pfcCompare" class="button">📊 PFC比較へ</button>
+        </div>
+
+        {% if rows %}
+        <h2 style="text-align:left;">「{{ keyword }}」の検索結果</h2>
+
+        <table id="foodTable">
+            <thead>
+                <tr>
+                    <th>グループ <span class="sort-arrow">▼</span></th>
+                    <th>番号 <span class="sort-arrow">▼</span></th>
+                    <th>食品名 <span class="sort-arrow">▼</span></th>
+                    <th>エネルギー(kcal) <span class="sort-arrow">▼</span></th>
+                    <th>たんぱく質(g) <span class="sort-arrow">▼</span></th>
+                    <th>脂質(g) <span class="sort-arrow">▼</span></th>
+                    <th>炭水化物(g) <span class="sort-arrow">▼</span></th>
+                    <th>ナトリウム(mg) <span class="sort-arrow">▼</span></th>
+                    <th>カリウム(mg) <span class="sort-arrow">▼</span></th>
+                    <th>カルシウム(mg) <span class="sort-arrow">▼</span></th>
+                    <th>マグネシウム(mg) <span class="sort-arrow">▼</span></th>
+                    <th>リン(mg) <span class="sort-arrow">▼</span></th>
+                    <th>鉄(mg) <span class="sort-arrow">▼</span></th>
+                    <th>お気に入り</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    {% for col in row %}
+                    <td>{{ col }}</td>
+                    {% endfor %}
+                    <td class="fav" data-id="{{ row[1] }}">☆</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+        <p style="text-align:center;">「{{ keyword }}」に一致する結果はありません。</p>
+        {% endif %}
+
+
+
+    </main>
+
+    <footer>
+        © 2025 筋トレ向け食品データ
+    </footer>
+
+    <!-- ▼ ソート / 列トグル / 初期制御 -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const table = document.getElementById("foodTable");
+
+            /* 初期非表示列（0〜6と13以外を非表示） */
+            function initialHide() {
+                const showColumns = [0, 1, 2, 3, 4, 5, 6, 13];
+                document.querySelectorAll("#foodTable tr").forEach(row => {
+                    row.querySelectorAll("td, th").forEach((cell, idx) => {
+                        if (!showColumns.includes(idx)) cell.style.display = "none";
+                    });
+                });
+            }
+            initialHide();
+
+            /* ▼ 列切り替え */
+            document.querySelectorAll(".dropdown-content input").forEach(chk => {
+                chk.addEventListener("change", () => {
+                    const col = Number(chk.dataset.col);
+                    document.querySelectorAll("#foodTable tr").forEach(row => {
+                        const cell = row.children[col];
+                        if (cell) cell.style.display = chk.checked ? "" : "none";
+                    });
+                });
+            });
+
+            /* ▼ ドロップダウン開閉 */
+            document.querySelector(".dropdown-btn").addEventListener("click", () => {
+                document.getElementById("columnDropdown").classList.toggle("show");
+            });
+
+            /* ▼ ソート機能 */
+            document.querySelectorAll("th").forEach((th, index) => {
+                const arrow = th.querySelector(".sort-arrow");
+                th.addEventListener("click", () => {
+
+                    const tbody = table.querySelector("tbody");
+                    const rows = Array.from(tbody.querySelectorAll("tr"));
+
+                    const current = th.dataset.order === "asc" ? "desc" : "asc";
+                    th.dataset.order = current;
+
+                    document.querySelectorAll("th .sort-arrow").forEach(a => {
+                        if (a !== arrow) a.textContent = "";
+                    });
+                    arrow.textContent = current === "asc" ? "▲" : "▼";
+
+                    rows.sort((a, b) => {
+                        const A = a.children[index].innerText;
+                        const B = b.children[index].innerText;
+
+                        const numA = parseFloat(A);
+                        const numB = parseFloat(B);
+
+                        if (!isNaN(numA) && !isNaN(numB)) {
+                            return current === "asc" ? numA - numB : numB - numA;
+                        }
+                        return current === "asc" ? A.localeCompare(B) : B.localeCompare(A);
+                    });
+
+                    tbody.innerHTML = "";
+                    rows.forEach(r => tbody.appendChild(r));
+                });
+            });
+
+        });
+    </script>
+
+    <!-- favorite.js を最後に読み込む（必須） -->
+    <script src="{{ url_for('static', filename='favorite.js') }}" defer></script>
+
+</body>
+
+</html>

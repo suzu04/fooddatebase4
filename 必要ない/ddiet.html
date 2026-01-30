@@ -183,6 +183,19 @@
     <footer>
         © 2025 Japan Science and Technology Agency. All rights reserved.
     </footer>
+    <script>
+        // ===== localStorage 初期化（favorite.js の前提）=====
+        if (!localStorage.getItem("favorites")) {
+            localStorage.setItem("favorites", "[]");
+        }
+
+        // 型ズレ防止（number → string）
+        const favs = JSON.parse(localStorage.getItem("favorites"));
+        localStorage.setItem(
+            "favorites",
+            JSON.stringify(favs.map(v => String(v)))
+        );
+    </script>
 
     <script src="/static/favorite.js"></script>
 
@@ -280,38 +293,6 @@
 
             document.addEventListener("click", () => {
                 dropdown.classList.remove("show");
-            });
-
-        });
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-
-            const checkboxes = document.querySelectorAll(".dropdown-content input[type='checkbox']");
-            const table = document.getElementById("foodTable");
-
-            function applyColumnVisibility(cb) {
-                const colIndex = parseInt(cb.dataset.col);
-
-                // th
-                table.querySelectorAll("thead th")[colIndex].style.display =
-                    cb.checked ? "" : "none";
-
-                // td
-                table.querySelectorAll("tbody tr").forEach(row => {
-                    row.children[colIndex].style.display =
-                        cb.checked ? "" : "none";
-                });
-            }
-
-            // ▼ 変更時
-            checkboxes.forEach(cb => {
-                cb.addEventListener("change", () => {
-                    applyColumnVisibility(cb);
-                });
-
-                // ▼ 初期状態を反映（← これが重要）
-                applyColumnVisibility(cb);
             });
 
         });

@@ -1,0 +1,41 @@
+<h2>保存したグループ</h2>
+
+<button onclick="location.href='group-create.html'">＋ 新しいグループを作成</button>
+
+<div id="groupList"></div>
+
+<script>
+    function loadGroups() {
+        const container = document.getElementById("groupList");
+        container.innerHTML = "";
+
+        const groups = JSON.parse(localStorage.getItem("groups") || "[]");
+
+        groups.forEach(g => {
+            const div = document.createElement("div");
+            div.innerHTML = `
+            <p>■ ${g.name}</p>
+            <button onclick="editGroup('${g.id}')">編集</button>
+            <button onclick="deleteGroup('${g.id}')">削除</button>
+            <hr>
+        `;
+            container.appendChild(div);
+        });
+    }
+
+    function editGroup(id) {
+        alert("編集画面へ（実装中）");
+    }
+
+    function deleteGroup(id) {
+        if (!confirm("削除しますか？")) return;
+
+        let groups = JSON.parse(localStorage.getItem("groups") || "[]");
+        groups = groups.filter(g => g.id !== id);
+        localStorage.setItem("groups", JSON.stringify(groups));
+
+        loadGroups();
+    }
+
+    loadGroups();
+</script>

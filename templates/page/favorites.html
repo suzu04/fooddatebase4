@@ -19,7 +19,7 @@
 
         <div class="controls">
             <button id="resetStars" class="button">⭐ リセット（選択中 <span id="compare-count">0</span> 件）</button>
-            <button id="pfcCompare" class="button">📊 PFC比較へ</button>
+            <button class="button" onclick="location.href='/pfc-compare'">📊 PFC比較へ</button>
             <button id="group" class="button">グループ化</button>
             <button class="button" onclick="location.href='/group-create'">グループ化一覧</button>
         </div>
@@ -203,6 +203,8 @@
                 alert("食品を選択してください");
                 return;
             }
+
+
 
             selectedCount.textContent = `選択中：${selected.length}件`;
             modal.style.display = "flex";
